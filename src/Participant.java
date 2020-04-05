@@ -61,6 +61,8 @@ public class Participant {
     // Getters
     public String getName() { return this.name; }//end getName()
     public Socket getClient() { return this.client; }//end getClient()
+    public int getPort() { return this.client.getPort(); }//end getPort()
+    public InetAddress getInetAdress() { return this.client.getInetAddress(); }//end getInetAddress
 
     /**
      * Sends a message to the participant

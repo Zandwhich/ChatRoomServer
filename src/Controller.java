@@ -2,6 +2,8 @@
  * Author: Alex Zdanowicz
  */
 
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.net.Inet4Address;
@@ -18,6 +20,12 @@ public class Controller {
      */
     ArrayList<Participant> participants;
 
+    /**
+     * The current port of the application.
+     * This field will cycle up and up as more people connect
+     */
+    int port;
+
     /* Constructor */
 
     /**
@@ -25,6 +33,7 @@ public class Controller {
      */
     public Controller() {
         this.participants = new ArrayList<>();
+        this.port = 1024;
     }//end Controller()
 
     /**
@@ -33,7 +42,18 @@ public class Controller {
     public void run() {
         try {
             System.out.println("IP Address: " + Inet4Address.getLocalHost());
-        } catch (UnknownHostException e) {
+
+            ServerSocket serverSocket = new ServerSocket(1024);
+            // TODO: Multi-thread this
+            Socket client = serverSocket.accept();
+            System.out.println("Connected to a client computer: " + client.getRemoteSocketAddress() + " on port " +
+                    client.getPort());
+
+            Participant participant = new Participant("Participant", client, this);
+            this.participants.add(participant);
+
+            this.participants.get(0).sendMessage("This is a test");
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.err.println(e.getStackTrace());
         }//end try/catch
