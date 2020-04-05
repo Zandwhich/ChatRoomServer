@@ -46,11 +46,12 @@ public class Controller {
             ServerSocket serverSocket = new ServerSocket(1024);
             // TODO: Multi-thread this
             Socket client = serverSocket.accept();
-            System.out.println("Connected to a client computer: " + client.getRemoteSocketAddress() + " on port " +
-                    client.getPort());
 
             Participant participant = new Participant("Participant", client, this);
             this.participants.add(participant);
+
+            System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
+                    participant.getLocalPort());
 
             this.participants.get(0).sendMessage("This is a test");
         } catch (Exception e) {
