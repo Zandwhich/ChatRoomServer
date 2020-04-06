@@ -15,27 +15,27 @@ public class Participant {
     /**
      * Name of the participant
      */
-    String name;
+    private String name;
 
     /**
      * Socket of participant
      */
-    Socket client;
+    private Socket client;
 
     /**
      * The controller with which to talk
      */
-    Controller controller;
+    private Controller controller;
 
     /**
      * Input stream from which to receive messages
      */
-    DataInputStream in;
+    private DataInputStream in;
 
     /**
      * Output stream from which to send messages
      */
-    DataOutputStream out;
+    private DataOutputStream out;
 
 
     /* Constructors */

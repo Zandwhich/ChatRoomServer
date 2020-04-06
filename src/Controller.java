@@ -18,13 +18,13 @@ public class Controller {
     /**
      * The list of participants in the group
      */
-    ArrayList<Participant> participants;
+    private ArrayList<Participant> participants;
 
     /**
      * The current port of the application.
      * This field will cycle up and up as more people connect
      */
-    int port;
+    private int port;
 
     /* Constructor */
 
