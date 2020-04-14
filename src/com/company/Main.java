@@ -1,4 +1,4 @@
-/**
+package com.company; /**
  * Author: Alex Zdanowicz
  */
 
@@ -15,4 +15,4 @@ public class Main {
         Controller controller = new Controller();
         controller.run();
     }//end main()
-}//end Main
+}//end com.company.Main

@@ -1,4 +1,4 @@
-/*
+package com.company;/*
  * Author: Alex Zdanowicz
  */
 
@@ -41,7 +41,7 @@ public class Participant {
     /* Constructors */
 
     /**
-     * The constructor of the Participant class
+     * The constructor of the com.company.Participant class
      * @param name The name of the participant
      * @param client The socket of the participant
      * @param controller The controller that controls everything
@@ -53,7 +53,7 @@ public class Participant {
         this.controller = controller;
         this.in = new DataInputStream(this.client.getInputStream());
         this.out = new DataOutputStream(this.client.getOutputStream());
-    }//end Participant()
+    }//end com.company.Participant()
 
 
     /* Methods */
@@ -75,4 +75,4 @@ public class Participant {
     }//end sendMessage()
 
 
-}//end Participant
+}//end com.company.Participant

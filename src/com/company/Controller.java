@@ -1,10 +1,9 @@
-/*
+package com.company;/*
  * Author: Alex Zdanowicz
  */
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.net.Inet4Address;
 
@@ -34,7 +33,7 @@ public class Controller {
     public Controller() {
         this.participants = new ArrayList<>();
         this.port = 1024;
-    }//end Controller()
+    }//end com.company.Controller()
 
     /**
      * The method that runs the server-side application
@@ -47,7 +46,7 @@ public class Controller {
             // TODO: Multi-thread this
             Socket client = serverSocket.accept();
 
-            Participant participant = new Participant("Participant", client, this);
+            Participant participant = new Participant("com.company.Participant", client, this);
             this.participants.add(participant);
 
             System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
@@ -59,4 +58,4 @@ public class Controller {
             System.err.println(e.getStackTrace());
         }//end try/catch
     }//end run()
-}//end Controller
+}//end com.company.Controller
