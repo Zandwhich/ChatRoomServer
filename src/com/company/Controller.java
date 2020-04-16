@@ -2,6 +2,7 @@ package com.company;/*
  * Author: Alex Zdanowicz
  */
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,6 +14,15 @@ import java.net.Inet4Address;
 public class Controller {
 
     /* Fields */
+
+    // Constants
+
+    /**
+     * The starting port number for the program
+     */
+    public static final int STARTING_PORT = 1024;
+
+    // Variables
 
     /**
      * The list of participants in the group
@@ -32,7 +42,7 @@ public class Controller {
      */
     public Controller() {
         this.participants = new ArrayList<>();
-        this.port = 1024;
+        this.port = Controller.STARTING_PORT;
     }//end com.company.Controller()
 
     /**
@@ -63,4 +73,22 @@ public class Controller {
             System.err.println(e.getStackTrace());
         }//end try/catch
     }//end run()
+
+    /**
+     * Sends a message out to all of the participants
+     * @param message The message to send out to all of the participants
+     */
+    public void broadcast(String message) {
+        for (Participant participant : this.participants) {
+            try {
+                participant.sendMessage(message);
+            } catch (IOException e) {
+                System.err.println("There was an error sending the message:" + message + " to participant: " +
+                        participant.getName());
+                System.err.println("Message: " + e.getMessage());
+                System.err.println("Cause: " + e.getCause());
+                System.err.println("Stack Trace: " + e.getStackTrace().toString());
+            }//end try/catch
+        }//end for
+    }//end broadcast()
 }//end com.company.Controller

@@ -1,6 +1,8 @@
-package com.company; /**
+/**
  * Author: Alex Zdanowicz
  */
+
+package com.company;
 
 /**
  * The main class to start off the application
