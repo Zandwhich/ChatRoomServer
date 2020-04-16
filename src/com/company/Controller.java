@@ -69,8 +69,10 @@ public class Controller {
 
 //            this.participants.get(0).sendMessage("This is a test");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.err.println(e.getStackTrace());
+            System.err.println("There was an error with the connection of a participant");
+            System.err.println("Message: " + e.getMessage());
+            System.err.println("Stack Trace:"); e.printStackTrace();
+            System.err.println("Cause: " + e.getCause());
         }//end try/catch
     }//end run()
 
