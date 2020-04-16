@@ -74,5 +74,9 @@ public class Participant {
         this.out.writeUTF(message);
     }//end sendMessage()
 
+    public String retrieveMessage() throws IOException /* TODO: Figure out where to throw the exception */ {
+        return this.in.readUTF();
+    }//end retrieveMessage()
+
 
 }//end com.company.Participant

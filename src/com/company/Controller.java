@@ -52,7 +52,12 @@ public class Controller {
             System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
                     participant.getLocalPort());
 
-            this.participants.get(0).sendMessage("This is a test");
+            // Test receiving messages
+            while (true) {
+                System.out.println(this.participants.get(0).retrieveMessage());
+            }//end while
+
+//            this.participants.get(0).sendMessage("This is a test");
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.err.println(e.getStackTrace());
