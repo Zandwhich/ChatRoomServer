@@ -79,6 +79,7 @@ public class Controller {
      * @param message The message to send out to all of the participants
      */
     public void broadcast(String message) {
+        // TODO: This should be in another thread
         for (Participant participant : this.participants) {
             try {
                 participant.sendMessage(message);
