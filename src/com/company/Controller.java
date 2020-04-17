@@ -4,8 +4,10 @@ package com.company;/*
 
 import json_simple.JSONObject;
 import json_simple.parser.JSONParser;
+import json_simple.parser.ParseException;
 
 import java.awt.*;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,7 +27,7 @@ public class Controller {
     /**
      * The starting port number for the program
      */
-    public static final int STARTING_PORT = 1024;
+    public static final int PORT = 1024;
 
     /**
      * The key for the name part of the object
@@ -72,6 +74,16 @@ public class Controller {
      */
     public static final Color MESSAGE_COLOR = Color.BLACK;
 
+    /**
+     * The color to use for the initial message when someone connects
+     */
+    public static final Color INITIAL_MESSAGE_COLOR = Color.GRAY;
+
+    /**
+     * The second half of the message to print when someone connects
+     */
+    public static final String JUST_CONNECTED_MESSAGE = " has joined the chat";
+
     // Variables
 
     /**
@@ -80,10 +92,10 @@ public class Controller {
     private ArrayList<Participant> participants;
 
     /**
-     * The current port of the application.
-     * This field will cycle up and up as more people connect
+     * The JSONParser used to parse the initial connection message
      */
-    private int port;
+    private JSONParser parser;
+
 
     /* Constructors */
 
@@ -92,7 +104,7 @@ public class Controller {
      */
     public Controller() {
         this.participants = new ArrayList<>();
-        this.port = Controller.STARTING_PORT;
+        this.parser = new JSONParser();
     }//end com.company.Controller()
 
     /* Methods */
@@ -114,21 +126,19 @@ public class Controller {
             return;
         }//end try/catch
 
-        this.port = Controller.STARTING_PORT;
+        ServerSocket serverSocket;
+        try {
+            serverSocket = new ServerSocket(Controller.PORT);
+        } catch (IOException e) {
+            System.err.println("There was an error creating the server socket. Breaking out");
+            this.printErrorMessage(e);
+            return;
+        }//end try/catch
 
         while (true) {
-
-            ServerSocket serverSocket;
-            try {
-                serverSocket = new ServerSocket();
-            } catch (IOException e) {
-                System.err.println("There was an error creating a new server socket. Breaking out");
-                this.printErrorMessage(e);
-                break;
-            }//end try/catch
-
             Socket client;
             try {
+                System.out.println("Waiting on port: " + Controller.PORT);
                 client = serverSocket.accept();
             } catch (IOException e) {
                 System.err.println("There was an error creating the client connection. Breaking out");
@@ -136,9 +146,23 @@ public class Controller {
                 break;
             }//end try/catch
 
+            String input = "";
+            String name = "";
+            try {
+                DataInputStream in = new DataInputStream(client.getInputStream());
+                input = in.readUTF();
+                name = getNameOutOfInitialMessage(input);
+                this.initialConnectionMessage(name);
+            } catch (IOException e) {
+                System.err.println("There was an error creating the temporary client connection. Continuing on");
+                this.printErrorMessage(e);
+            } catch (ParseException e) {
+                System.err.println("There was an error parsing the name out of the initial message.\nInitial message: " + input);
+            }//end try/catch
+
             Participant participant;
             try {
-                participant = new Participant("com.company.Participant", client, this);
+                participant = new Participant(name, client, this);
             } catch (IOException e) {
                 System.err.println("There was an error creating a participant. Breaking out");
                 this.printErrorMessage(e);
@@ -147,6 +171,8 @@ public class Controller {
             this.participants.add(participant);
             System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
                     participant.getLocalPort());
+
+            //this.port++;
         }//end while true
     }//end run()
 
@@ -159,6 +185,16 @@ public class Controller {
      */
     public void sendMessage(String name, Color nameColor, String message, Color messageColor) {
         JSONObject messageObject = this.constructNamedMessage(name, message, nameColor, messageColor);
+        this.broadcast(messageObject.toString());
+    }//end sendMessage()
+
+    /**
+     * Sends a message to all of the participants
+     * @param message The message
+     * @param messageColor The color of the message
+     */
+    public void sendMessage(String message, Color messageColor) {
+        JSONObject messageObject = this.constructMessage(message, messageColor);
         this.broadcast(messageObject.toString());
     }//end sendMessage()
 
@@ -176,22 +212,24 @@ public class Controller {
         JSONObject nameObject = new JSONObject();
         nameObject.put(Controller.TEXT_KEY, name);
 
-        JSONObject nameColorObject = new JSONObject();
-        nameColorObject.put(Controller.RED_KEY, nameColor.getRed());
-        nameColorObject.put(Controller.GREEN_KEY, nameColor.getGreen());
-        nameColorObject.put(Controller.BLUE_KEY, nameColor.getBlue());
-
-        nameObject.put(Controller.COLOR_KEY, nameColorObject);
+        // TODO: Uncomment this later when we're ready for colors
+//        JSONObject nameColorObject = new JSONObject();
+//        nameColorObject.put(Controller.RED_KEY, nameColor.getRed());
+//        nameColorObject.put(Controller.GREEN_KEY, nameColor.getGreen());
+//        nameColorObject.put(Controller.BLUE_KEY, nameColor.getBlue());
+//
+//        nameObject.put(Controller.COLOR_KEY, nameColorObject);
 
         JSONObject messageObject = new JSONObject();
         messageObject.put(Controller.TEXT_KEY, message);
 
-        JSONObject messageColorObject = new JSONObject();
-        messageColorObject.put(Controller.RED_KEY, messageColor.getRed());
-        messageColorObject.put(Controller.GREEN_KEY, messageColor.getGreen());
-        messageColorObject.put(Controller.BLUE_KEY, messageColor.getBlue());
-
-        messageObject.put(Controller.COLOR_KEY, messageColorObject);
+        // TODO: Uncomment this later when we're ready for colors
+//        JSONObject messageColorObject = new JSONObject();
+//        messageColorObject.put(Controller.RED_KEY, messageColor.getRed());
+//        messageColorObject.put(Controller.GREEN_KEY, messageColor.getGreen());
+//        messageColorObject.put(Controller.BLUE_KEY, messageColor.getBlue());
+//
+//        messageObject.put(Controller.COLOR_KEY, messageColorObject);
 
         JSONObject namedMessageObject = new JSONObject();
         namedMessageObject.put(Controller.NAME_KEY, nameObject);
@@ -199,6 +237,31 @@ public class Controller {
 
         return namedMessageObject;
     }//end constructNamedMessage()
+
+    /**
+     * Constructs the JSONObject for a message without a name
+     * (Mostly used for the initial message)
+     * @param message The message
+     * @param messageColor The color of the message
+     * @return The JSONObject constructed and ready to be sent
+     */
+    private JSONObject constructMessage(String message, Color messageColor) {
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(Controller.TEXT_KEY, message);
+
+        // TODO: Uncomment this later when we're ready for colors
+//        JSONObject messageColorObject = new JSONObject();
+//        messageColorObject.put(Controller.RED_KEY, messageColor.getRed());
+//        messageColorObject.put(Controller.GREEN_KEY, messageColor.getGreen());
+//        messageColorObject.put(Controller.BLUE_KEY, messageColor.getBlue());
+//
+//        messageObject.put(Controller.COLOR_KEY, messageColorObject);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Controller.MESSAGE_KEY, messageObject);
+
+        return jsonObject;
+    }//end constructMessage()
 
     /**
      * Sends a message out to all of the participants
@@ -224,9 +287,28 @@ public class Controller {
      * @param e The exception
      */
     private void printErrorMessage(Exception e) {
-        System.err.println("Port number: " + this.port);
+        System.err.println("Port number: " + Controller.PORT);
         System.err.println("Message: " + e.getMessage());
         System.err.println("Cause: " + e.getCause());
         System.err.println("Stack Trace:"); e.printStackTrace();
     }//end printErrorMessage()
+
+    /**
+     * Sends out to everyone the message when someone first connects
+     * @param name The name of the person who just connected
+     */
+    private void initialConnectionMessage(String name) {
+        this.sendMessage(name + Controller.JUST_CONNECTED_MESSAGE, Controller.INITIAL_MESSAGE_COLOR);
+    }//end initialConnectionMessage()
+
+    /**
+     * Gets the name out of the initial message that someone sends
+     * @param message The initial message that a participant sends
+     * @return The name of the participant
+     */
+    private String getNameOutOfInitialMessage(String message) throws ParseException {
+        JSONObject jsonObject = (JSONObject) this.parser.parse(message);
+
+        return (String) jsonObject.get(Controller.NAME_KEY);
+    }//end getNameOutOfInitialMessage()
 }//end com.company.Controller
