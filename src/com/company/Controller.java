@@ -152,7 +152,6 @@ public class Controller {
                 DataInputStream in = new DataInputStream(client.getInputStream());
                 input = in.readUTF();
                 name = getNameOutOfInitialMessage(input);
-                this.initialConnectionMessage(name);
             } catch (IOException e) {
                 System.err.println("There was an error creating the temporary client connection. Continuing on");
                 this.printErrorMessage(e);
@@ -171,7 +170,7 @@ public class Controller {
             this.participants.add(participant);
             System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
                     participant.getLocalPort());
-
+            this.initialConnectionMessage(name);
             //this.port++;
         }//end while true
     }//end run()
