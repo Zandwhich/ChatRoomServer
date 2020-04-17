@@ -9,6 +9,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.net.Inet4Address;
 
@@ -66,6 +67,11 @@ public class Controller {
      */
     public static final String BLUE_KEY = "blue";
 
+    /**
+     * The color to use for messages from people
+     */
+    public static final Color MESSAGE_COLOR = Color.BLACK;
+
     // Variables
 
     /**
@@ -79,7 +85,7 @@ public class Controller {
      */
     private int port;
 
-    /* Constructor */
+    /* Constructors */
 
     /**
      * The default constructor
@@ -89,62 +95,74 @@ public class Controller {
         this.port = Controller.STARTING_PORT;
     }//end com.company.Controller()
 
+    /* Methods */
+
+    // Public
+
     /**
      * The method that runs the server-side application
      */
     public void run() {
+
+        // Print out the IP Address of this computer
         try {
             System.out.println("IP Address: " + Inet4Address.getLocalHost());
+        } catch (UnknownHostException e) {
+            System.err.println("There was an error printing out the IP Address of the local host.\n" +
+                    "Shutting down the program");
+            this.printErrorMessage(e);
+            return;
+        }//end try/catch
 
-            ServerSocket serverSocket = new ServerSocket(1024);
-            // TODO: Multi-thread this
-            Socket client = serverSocket.accept();
+        this.port = Controller.STARTING_PORT;
 
-            Participant participant = new Participant("com.company.Participant", client, this);
+        while (true) {
+
+            ServerSocket serverSocket;
+            try {
+                serverSocket = new ServerSocket();
+            } catch (IOException e) {
+                System.err.println("There was an error creating a new server socket. Breaking out");
+                this.printErrorMessage(e);
+                break;
+            }//end try/catch
+
+            Socket client;
+            try {
+                client = serverSocket.accept();
+            } catch (IOException e) {
+                System.err.println("There was an error creating the client connection. Breaking out");
+                this.printErrorMessage(e);
+                break;
+            }//end try/catch
+
+            Participant participant;
+            try {
+                participant = new Participant("com.company.Participant", client, this);
+            } catch (IOException e) {
+                System.err.println("There was an error creating a participant. Breaking out");
+                this.printErrorMessage(e);
+                break;
+            }// end try/catch
             this.participants.add(participant);
-
             System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
                     participant.getLocalPort());
-
-            // Test receiving messages
-            while (true) {
-                // TODO: This is only here temporarily
-                String temp = this.participants.get(0).retrieveMessage();
-                System.out.println(temp);
-                JSONParser parser = new JSONParser();
-                JSONObject message = (JSONObject) parser.parse(temp);
-                JSONObject returnMessage = this.constructNamedMessage((String) message.get(Controller.NAME_KEY),
-                        (String) message.get(Controller.MESSAGE_KEY), Color.BLUE, Color.BLACK);
-                this.broadcast(returnMessage.toString());
-            }//end while
-
-//            this.participants.get(0).sendMessage("This is a test");
-        } catch (Exception e) {
-            System.err.println("There was an error with the connection of a participant");
-            System.err.println("Message: " + e.getMessage());
-            System.err.println("Stack Trace:"); e.printStackTrace();
-            System.err.println("Cause: " + e.getCause());
-        }//end try/catch
+        }//end while true
     }//end run()
 
     /**
-     * Sends a message out to all of the participants
-     * @param message The message to send out to all of the participants
+     * Sends a message to all of the participants
+     * @param name The name of the participant sending the message
+     * @param nameColor The color of the name of the participant
+     * @param message The message that the participant has sent
+     * @param messageColor The color of the message
      */
-    public void broadcast(String message) {
-        // TODO: This should be in another thread
-        for (Participant participant : this.participants) {
-            try {
-                participant.sendMessage(message);
-            } catch (IOException e) {
-                System.err.println("There was an error sending the message:" + message + " to participant: " +
-                        participant.getName());
-                System.err.println("Message: " + e.getMessage());
-                System.err.println("Cause: " + e.getCause());
-                System.err.println("Stack Trace:"); e.printStackTrace();
-            }//end try/catch
-        }//end for
-    }//end broadcast()
+    public void sendMessage(String name, Color nameColor, String message, Color messageColor) {
+        JSONObject messageObject = this.constructNamedMessage(name, message, nameColor, messageColor);
+        this.broadcast(messageObject.toString());
+    }//end sendMessage()
+
+    // Private
 
     /**
      * Constructs the JSONObject for a named object (as according to the README)
@@ -154,7 +172,7 @@ public class Controller {
      * @return The constructed JSONObject with all of the information
      */
     @SuppressWarnings("DuplicatedCode")
-    public JSONObject constructNamedMessage(String name, String message, Color nameColor, Color messageColor) {
+    private JSONObject constructNamedMessage(String name, String message, Color nameColor, Color messageColor) {
         JSONObject nameObject = new JSONObject();
         nameObject.put(Controller.TEXT_KEY, name);
 
@@ -181,4 +199,34 @@ public class Controller {
 
         return namedMessageObject;
     }//end constructNamedMessage()
+
+    /**
+     * Sends a message out to all of the participants
+     * @param message The message to send out to all of the participants
+     */
+    private void broadcast(String message) {
+        // TODO: This should be in another thread
+        for (Participant participant : this.participants) {
+            try {
+                participant.sendMessage(message);
+            } catch (IOException e) {
+                System.err.println("There was an error sending the message:" + message + " to participant: " +
+                        participant.getName());
+                System.err.println("Message: " + e.getMessage());
+                System.err.println("Cause: " + e.getCause());
+                System.err.println("Stack Trace:"); e.printStackTrace();
+            }//end try/catch
+        }//end for
+    }//end broadcast()
+
+    /**
+     * Prints out a series of error messages when one happens
+     * @param e The exception
+     */
+    private void printErrorMessage(Exception e) {
+        System.err.println("Port number: " + this.port);
+        System.err.println("Message: " + e.getMessage());
+        System.err.println("Cause: " + e.getCause());
+        System.err.println("Stack Trace:"); e.printStackTrace();
+    }//end printErrorMessage()
 }//end com.company.Controller
