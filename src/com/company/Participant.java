@@ -29,7 +29,7 @@ public class Participant {
         /**
          * The JSONParser used in parsing Strings into JSONObjects
          */
-        JSONParser parser;
+        private JSONParser parser;
 
         /* Constructors */
 
@@ -55,7 +55,13 @@ public class Participant {
 
             while(true) {
                 try {
+
+                    System.out.println("In the 'run' method of the InputThread waiting for input from the participant\n");
+
                     input = this.readInput();
+
+                    System.out.println("In the 'run' method of the InputThread, just read the input from the participant: " + input + "\n");
+
                 } catch (IOException e) {
                     System.err.println("There was an error while trying to read in data from the participant");
                     System.err.println("Message: " + e.getMessage());
@@ -64,10 +70,17 @@ public class Participant {
                     break;
                 }//end try/catch
 
+                System.out.println("In the 'run' method of the InputThread, about to deserialize the input into a JSON\n");
+
                 JSONObject jsonInput = this.deserializeMessageFromParticipant(input);
 
                 // There was an error with reading in this message; skipping over it and continuing on
-                if (jsonInput == null) continue;
+                if (jsonInput == null) {
+
+                    System.out.println("There was an error deserializing the message, and the jsonInput is null\n");
+
+                    continue;
+                }//end if
 
                 this.broadcastMessage(jsonInput);
             }//end while
@@ -187,13 +200,26 @@ public class Participant {
      * @throws IOException TODO: Fill this in
      */
     public Participant(String name, Socket client, Controller controller) throws IOException /* TODO: Figure out where to throw the exception */ {
+
+        System.out.println("In the constructor for the participant " + name + "\n");
+
         this.name = name;
         this.client = client;
         this.controller = controller;
+
+        System.out.println("Creating the DataInputStream for the participant\n");
+
         this.in = new DataInputStream(this.client.getInputStream());
+
+        System.out.println("Finished creating the DataInputStream for the participant\nCreating the DataOutputStream for the participant\n");
+
         this.out = new DataOutputStream(this.client.getOutputStream());
 
+        System.out.println("Finished creating the DataOutputStream for the participant\nCreating the input thread\n");
+
         InputThread inputThread = new InputThread(Participant.INPUT_THREAD_NAME);
+
+        System.out.println("Finished creating the input thread\nFinished the participant constructor\n");
         inputThread.start();
     }//end com.company.Participant()
 
@@ -213,17 +239,13 @@ public class Participant {
      * @throws IOException TODO: Fill this in
      */
     public void sendMessage(String message) throws IOException /* TODO: Figure out where to throw the exception */ {
-        this.out.writeUTF(message);
-    }//end sendMessage()
 
-    /**
-     * Retrieves messages from the participant
-     * @return The message from the participant
-     * @throws IOException TODO: Fill this in
-     */
-    public String retrieveMessage() throws IOException /* TODO: Figure out where to throw the exception */ {
-        return this.in.readUTF();
-    }//end retrieveMessage()
+        System.out.println("Sending a message out to participant: " + this.name + "\nMessage: " + message + "\n");
+
+        this.out.writeUTF(message);
+
+        System.out.println("Sent out a message to participant: " + this.name + "\n");
+    }//end sendMessage()
 
 
 }//end com.company.Participant

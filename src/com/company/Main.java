@@ -14,6 +14,8 @@ public class Main {
      * @param args Arguments
      */
     public static void main(String[] args) {
+
+        System.out.println("Starting the program");
         Controller controller = new Controller();
         controller.run();
     }//end main()

@@ -116,6 +116,8 @@ public class Controller {
      */
     public void run() {
 
+        System.out.println("Starting the run method in the controller\n");
+
         // Print out the IP Address of this computer
         try {
             System.out.println("IP Address: " + Inet4Address.getLocalHost());
@@ -128,12 +130,17 @@ public class Controller {
 
         ServerSocket serverSocket;
         try {
+
+            System.out.println("Creating the server socket to connect to\n");
+
             serverSocket = new ServerSocket(Controller.PORT);
         } catch (IOException e) {
             System.err.println("There was an error creating the server socket. Breaking out");
             this.printErrorMessage(e);
             return;
         }//end try/catch
+
+        System.out.println("Starting the while(true) loop\n");
 
         while (true) {
             Socket client;
@@ -146,12 +153,26 @@ public class Controller {
                 break;
             }//end try/catch
 
+            System.out.println("Accepted the client connection");
+
             String input = "";
             String name = "";
             try {
+
+                System.out.println("Creating the DataInputStream\n");
+
                 DataInputStream in = new DataInputStream(client.getInputStream());
+
+                System.out.println("DataInputStream created\nReading the input from the client to get the name\n");
+
                 input = in.readUTF();
+
+                System.out.println("Read in the input from the client\nInput: " + input + "\nParsing out the name now\n");
+
                 name = getNameOutOfInitialMessage(input);
+
+                System.out.println("Name: " + name + "\nFinished parsing out the name\n");
+
             } catch (IOException e) {
                 System.err.println("There was an error creating the temporary client connection. Continuing on");
                 this.printErrorMessage(e);
@@ -161,7 +182,13 @@ public class Controller {
 
             Participant participant;
             try {
+
+                System.out.println("Creating a new participant object\n");
+
                 participant = new Participant(name, client, this);
+
+                System.out.println("Created a new participant object\n");
+
             } catch (IOException e) {
                 System.err.println("There was an error creating a participant. Breaking out");
                 this.printErrorMessage(e);
@@ -171,7 +198,6 @@ public class Controller {
             System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
                     participant.getLocalPort());
             this.initialConnectionMessage(name);
-            //this.port++;
         }//end while true
     }//end run()
 
@@ -267,7 +293,10 @@ public class Controller {
      * @param message The message to send out to all of the participants
      */
     private void broadcast(String message) {
-        // TODO: This should be in another thread
+        // TODO: This should be in another thread (I think?)
+
+        System.out.println("About to broadcast a message to all of the participants\n");
+
         for (Participant participant : this.participants) {
             try {
                 participant.sendMessage(message);
