@@ -1,6 +1,8 @@
-package com.company;/*
+/*
  * Author: Alex Zdanowicz
  */
+
+package com.company;
 
 import json_simple.JSONObject;
 import json_simple.parser.JSONParser;
@@ -149,7 +151,7 @@ public class Participant {
     /**
      * Name of the participant
      */
-    private String name;
+    private final String name;
 
     /**
      * The color for the participant's name
@@ -159,22 +161,22 @@ public class Participant {
     /**
      * Socket of participant
      */
-    private Socket client;
+    private final Socket client;
 
     /**
      * The controller with which to talk
      */
-    private Controller controller;
+    private final Controller controller;
 
     /**
      * Input stream from which to receive messages
      */
-    private DataInputStream in;
+    private final DataInputStream in;
 
     /**
      * Output stream from which to send messages
      */
-    private DataOutputStream out;
+    private final DataOutputStream out;
 
 
     /* Constructors */
@@ -184,9 +186,9 @@ public class Participant {
      * @param name The name of the participant
      * @param client The socket of the participant
      * @param controller The controller that controls everything
-     * @throws IOException TODO: Fill this in
+     * @throws IOException When there is a faulty connection
      */
-    public Participant(String name, Socket client, Controller controller) throws IOException /* TODO: Figure out where to throw the exception */ {
+    public Participant(String name, Socket client, Controller controller) throws IOException {
         this.name = name;
         this.client = client;
         this.controller = controller;
@@ -210,18 +212,18 @@ public class Participant {
     /**
      * Sends a message to the participant
      * @param message The message that is sent to the participant
-     * @throws IOException TODO: Fill this in
+     * @throws IOException Where there's an error? Idk man...
      */
-    public void sendMessage(String message) throws IOException /* TODO: Figure out where to throw the exception */ {
+    public void sendMessage(String message) throws IOException {
         this.out.writeUTF(message);
     }//end sendMessage()
 
     /**
      * Retrieves messages from the participant
      * @return The message from the participant
-     * @throws IOException TODO: Fill this in
+     * @throws IOException I think this is for when there's an error (lol)
      */
-    public String retrieveMessage() throws IOException /* TODO: Figure out where to throw the exception */ {
+    public String retrieveMessage() throws IOException {
         return this.in.readUTF();
     }//end retrieveMessage()
 
