@@ -1,48 +1,14 @@
-# ChatRoomServer
-Server-Side Code of the Chat Room
+# ChatRoom — Server
 
-I am using json_simple. I didn't make it.
+The server-side of a Java chat room application. Manages client connections and broadcasts messages to all connected users.
 
-Example of JSONs:
+> **See also:** [ChatRoom Client](https://github.com/Zandwhich/ChatRoomClient)
 
-To Server:
-{
-	"name": "Alex",
-	"message": "This is a test",
-	"time": 7894612543
-}
+## Overview
 
-From Server:
-{
-	"name": {
-		"text": "Alex",
-		"colour": {
-			"red": 30,
-			"green": 187,
-			"blue": 92
-		}
-	},
-	"message": {
-		"text": "This is the message",
-		"colour": {
-			"red": 30,
-			"green": 187,
-			"blue": 92
-		}
-	},
-	"time": 157951354513215
-}
+Built in Java, the server listens for incoming socket connections and relays messages between clients. Outgoing messages include per-user colour data for display in the client UI.
 
-OR
+## Tech
 
-{
-	"messsage": {
-		"text": "Alex has joined the chat",
-		"colour": {
-			"red": 20,
-			"green": 78,
-			"blue": 197
-		}
-	},
-	"time": 15798715648684
-}
+- **Language:** Java
+- **Library:** [json_simple](https://code.google.com/archive/p/json-simple/)
