@@ -29,3 +29,7 @@ META-INF
 
 # Maven build output
 target/
+
+# Claude
+.claude/settings.local.json
+.claude/worktrees/
