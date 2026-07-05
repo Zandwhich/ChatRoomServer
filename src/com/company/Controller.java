@@ -73,14 +73,16 @@ public class Controller {
     public static final Color MESSAGE_COLOR = Color.BLACK;
 
     /**
-     * The colour to use for the initial message when someone connects
+     * The colour to use when the system sends a message
      */
-    public static final Color INITIAL_MESSAGE_COLOR = Color.GRAY;
+    public static final Color SYSTEM_MESSAGE_COLOR = Color.GRAY;
 
     /**
      * The second half of the message to print when someone connects
      */
-    public static final String JUST_CONNECTED_MESSAGE = " has joined the chat";
+    public static final String PARTICIPANT_CONNECTED_MESSAGE = " has joined the chat";
+
+    public static final String PARTICIPANT_DISCONNECTED_MESSAGE = " has left the chat";
 
     /**
      * The list of participants in the group
@@ -220,7 +222,7 @@ public class Controller {
         this.participants.add(participant);
         System.out.println("Connected to a client computer: " + participant.getInetAddress() +
                 " on local port " + participant.getLocalPort());
-        this.initialConnectionMessage(participant.getName());
+        this.sendParticipantConnectedMessage(participant.getName());
     }
 
     public void run() {
@@ -347,12 +349,24 @@ public class Controller {
         System.err.println("Stack Trace:"); e.printStackTrace();
     }
 
+    private void sendSystemMessage(String message) {
+        this.sendMessage(message, Controller.SYSTEM_MESSAGE_COLOR);
+    }
+
     /**
-     * Sends out to everyone the message when someone first connects
-     * @param name The name of the person who just connected
+     * Broadcasts a message when someone joins the chat
+     * @param participant The participant that just joined the chat
      */
-    private void initialConnectionMessage(String name) {
-        this.sendMessage(name + Controller.JUST_CONNECTED_MESSAGE, Controller.INITIAL_MESSAGE_COLOR);
+    private void sendParticipantConnectedMessage(Participant participant) {
+        this.sendSystemMessage(participant.getName() + Controller.PARTICIPANT_CONNECTED_MESSAGE);
+    }
+
+    /**
+     * Broadcasts a message when someone leaves the chat
+     * @param participant The participant that just left the chat
+     */
+    public void sendParticipantDisconnectedMessage(Participant participant) {
+        this.sendSystemMessage(participant.getName() + Controller.PARTICIPANT_DISCONNECTED_MESSAGE);
     }
 
     /**

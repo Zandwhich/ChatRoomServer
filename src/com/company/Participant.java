@@ -25,15 +25,21 @@ public class Participant {
         /**
          * The JSONParser used in parsing Strings into JSONObjects
          */
-        JSONParser parser;
+        final JSONParser parser;
+
+        /**
+         * A reference to the participant
+         */
+        final Participant participant;
 
         /**
          * The constructor for the input thread
          * @param threadName The name of the thread
          */
-        public InputThread(String threadName) {
+        public InputThread(String threadName, Participant participant) {
             super(threadName);
             this.parser = new JSONParser();
+            this.participant = participant;
         }
 
         /**
@@ -81,6 +87,8 @@ public class Participant {
             try {
                 jsonObject = (JSONObject) this.parser.parse(message);
             } catch (ParseException e) {
+
+                controller.sendParticipantDisconnectedMessage(this.participant);
                 System.err.println("An error occurred while trying to parse a message from participant " + name +
                         " into JSON. Will continue on");
                 System.err.println("Message from the participant: " + message);
@@ -172,7 +180,7 @@ public class Participant {
         this.in = new DataInputStream(this.client.getInputStream());
         this.out = new DataOutputStream(this.client.getOutputStream());
 
-        InputThread inputThread = new InputThread(Participant.INPUT_THREAD_NAME);
+        InputThread inputThread = new InputThread(Participant.INPUT_THREAD_NAME, this);
         inputThread.start();
     }
 
