@@ -4,9 +4,9 @@
 
 package com.company;
 
-import json_simple.JSONObject;
-import json_simple.parser.JSONParser;
-import json_simple.parser.ParseException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.awt.*;
 import java.net.*;
