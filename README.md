@@ -11,4 +11,3 @@ Built in Java, the server listens for incoming socket connections and relays mes
 ## Tech
 
 - **Language:** Java
-- **Library:** [json_simple](https://code.google.com/archive/p/json-simple/)
