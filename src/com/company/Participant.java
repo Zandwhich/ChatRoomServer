@@ -52,23 +52,29 @@ public class Participant {
          */
         @Override
         public void run() {
-            String input;
-
             while(connected) {
-                try {
-                    input = this.readInput();
-                } catch (IOException e) {
-                    this.handleDisconnect();
-                    break;
-                }
-
-                JSONObject jsonInput = this.deserializeMessageFromParticipant(input);
-
-                // There was an error with reading in this message; skipping over it and continuing on
-                if (jsonInput == null) continue;
-
-                this.broadcastMessage(jsonInput);
+                if (!processNextMessage()) break;
             }
+        }
+
+        /**
+         * Reads, deserializes, and broadcasts a single message from the participant.
+         * @return true if the loop should continue, false if the participant disconnected
+         */
+        private boolean processNextMessage() {
+            String input;
+            try {
+                input = this.readInput();
+            } catch (IOException e) {
+                this.handleDisconnect();
+                return false;
+            }
+
+            JSONObject jsonInput = this.deserializeMessageFromParticipant(input);
+            if (jsonInput == null) return true;
+
+            this.broadcastMessage(jsonInput);
+            return true;
         }
 
         /**
@@ -113,21 +119,27 @@ public class Participant {
          * @param jsonMessage The message to broadcast as a JSON object
          */
         private void broadcastMessage(JSONObject jsonMessage) {
-            if (!jsonMessage.containsKey(Controller.MESSAGE_KEY) || jsonMessage.get(Controller.MESSAGE_KEY) == null) {
-                this.malformedParticipantMessage(jsonMessage);
-                return;
-            }
+            String message = this.extractField(jsonMessage, Controller.MESSAGE_KEY);
+            if (message == null) return;
 
-            String message = (String) jsonMessage.get(Controller.MESSAGE_KEY);
-
-            if (!jsonMessage.containsKey(Controller.NAME_KEY) || jsonMessage.get(Controller.NAME_KEY) == null) {
-                this.malformedParticipantMessage(jsonMessage);
-                return;
-            }
-
-            String name = (String) jsonMessage.get(Controller.NAME_KEY);
+            String name = this.extractField(jsonMessage, Controller.NAME_KEY);
+            if (name == null) return;
 
             controller.sendMessage(name, nameColor, message, Controller.MESSAGE_COLOR);
+        }
+
+        /**
+         * Extracts a required string field from a JSON message.
+         * @param jsonMessage The JSON message to extract from
+         * @param key The key to extract
+         * @return The field value, or null if missing or null
+         */
+        private String extractField(JSONObject jsonMessage, String key) {
+            if (!jsonMessage.containsKey(key) || jsonMessage.get(key) == null) {
+                this.malformedParticipantMessage(jsonMessage);
+                return null;
+            }
+            return (String) jsonMessage.get(key);
         }
 
         private void handleDisconnect() {

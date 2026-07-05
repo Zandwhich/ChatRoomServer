@@ -225,6 +225,10 @@ public class Controller {
         this.sendParticipantConnectedMessage(participant);
     }
 
+    /**
+     * Removes a participant from the group and announces their departure.
+     * @param participant the disconnected participant
+     */
     public void disconnectParticipant(Participant participant) {
         this.participants.remove(participant);
         System.out.println("Participant disconnected: " + participant.getInetAddress() +
