@@ -11,7 +11,8 @@ import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -57,15 +58,18 @@ public class Controller {
 
   public static final String PARTICIPANT_DISCONNECTED_MESSAGE = " has left the chat";
 
-  /** The list of participants in the group */
-  private final ArrayList<Participant> participants;
+  /**
+   * The list of participants in the group. Copy-on-write so broadcasts can iterate safely while
+   * participants join or leave on other threads.
+   */
+  private final List<Participant> participants;
 
   /** The JSONParser used to parse the initial connection message */
   private final JSONParser parser;
 
   /** The default constructor */
   public Controller() {
-    this.participants = new ArrayList<>();
+    this.participants = new CopyOnWriteArrayList<>();
     this.parser = new JSONParser();
   }
 
@@ -269,30 +273,15 @@ public class Controller {
    * @param nameColor The colour of the name
    * @return The constructed JSONObject with all the information
    */
-  @SuppressWarnings("DuplicatedCode")
   private JSONObject constructNamedMessage(
       String name, String message, Color nameColor, Color messageColor) {
     JSONObject nameObject = new JSONObject();
     nameObject.put(Controller.TEXT_KEY, name);
-
-    // TODO: Uncomment this later when we're ready for colors
-    //        JSONObject nameColorObject = new JSONObject();
-    //        nameColorObject.put(Controller.RED_KEY, nameColor.getRed());
-    //        nameColorObject.put(Controller.GREEN_KEY, nameColor.getGreen());
-    //        nameColorObject.put(Controller.BLUE_KEY, nameColor.getBlue());
-    //
-    //        nameObject.put(Controller.COLOR_KEY, nameColorObject);
+    nameObject.put(Controller.COLOR_KEY, this.constructColorObject(nameColor));
 
     JSONObject messageObject = new JSONObject();
     messageObject.put(Controller.TEXT_KEY, message);
-
-    // TODO: Uncomment this later when we're ready for colors
-    //        JSONObject messageColorObject = new JSONObject();
-    //        messageColorObject.put(Controller.RED_KEY, messageColor.getRed());
-    //        messageColorObject.put(Controller.GREEN_KEY, messageColor.getGreen());
-    //        messageColorObject.put(Controller.BLUE_KEY, messageColor.getBlue());
-    //
-    //        messageObject.put(Controller.COLOR_KEY, messageColorObject);
+    messageObject.put(Controller.COLOR_KEY, this.constructColorObject(messageColor));
 
     JSONObject namedMessageObject = new JSONObject();
     namedMessageObject.put(Controller.NAME_KEY, nameObject);
@@ -311,19 +300,28 @@ public class Controller {
   private JSONObject constructMessage(String message, Color messageColor) {
     JSONObject messageObject = new JSONObject();
     messageObject.put(Controller.TEXT_KEY, message);
-
-    // TODO: Uncomment this later when we're ready for colors
-    //        JSONObject messageColorObject = new JSONObject();
-    //        messageColorObject.put(Controller.RED_KEY, messageColor.getRed());
-    //        messageColorObject.put(Controller.GREEN_KEY, messageColor.getGreen());
-    //        messageColorObject.put(Controller.BLUE_KEY, messageColor.getBlue());
-    //
-    //        messageObject.put(Controller.COLOR_KEY, messageColorObject);
+    messageObject.put(Controller.COLOR_KEY, this.constructColorObject(messageColor));
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put(Controller.MESSAGE_KEY, messageObject);
 
     return jsonObject;
+  }
+
+  /**
+   * Constructs the JSONObject for a colour, breaking it into its red, green, and blue components
+   * (as according to the README)
+   *
+   * @param color The colour to serialize
+   * @return The constructed JSONObject holding the colour's components
+   */
+  private JSONObject constructColorObject(Color color) {
+    JSONObject colorObject = new JSONObject();
+    colorObject.put(Controller.RED_KEY, color.getRed());
+    colorObject.put(Controller.GREEN_KEY, color.getGreen());
+    colorObject.put(Controller.BLUE_KEY, color.getBlue());
+
+    return colorObject;
   }
 
   /**

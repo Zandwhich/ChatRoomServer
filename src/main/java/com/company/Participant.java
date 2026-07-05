@@ -7,6 +7,7 @@ package com.company;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.ThreadLocalRandom;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -151,8 +152,8 @@ public class Participant {
   /** Name of the participant */
   private final String name;
 
-  /** The colour for the participant's name */
-  private Color nameColor;
+  /** The colour for the participant's name, assigned randomly on connection */
+  private final Color nameColor;
 
   /** Socket of participant */
   private final Socket client;
@@ -178,6 +179,7 @@ public class Participant {
     this.name = name;
     this.client = client;
     this.controller = controller;
+    this.nameColor = randomNameColor();
     this.in = new DataInputStream(this.client.getInputStream());
     this.out = new DataOutputStream(this.client.getOutputStream());
 
@@ -193,24 +195,10 @@ public class Participant {
   }
 
   /**
-   * @return The socket of the participant
-   */
-  public Socket getClient() {
-    return this.client;
-  }
-
-  /**
    * @return The local port of the participant's connection
    */
   public int getLocalPort() {
     return this.client.getLocalPort();
-  }
-
-  /**
-   * @return The remote port of the participant's connection
-   */
-  public int getRemotePort() {
-    return this.client.getPort();
   }
 
   /**
@@ -231,12 +219,12 @@ public class Participant {
   }
 
   /**
-   * Retrieves messages from the participant
+   * Generates a random colour for a participant's name. Uses a random hue with fixed saturation and
+   * brightness so every colour is vivid and legible.
    *
-   * @return The message from the participant
-   * @throws IOException If there's an error reading the message
+   * @return A randomly-generated colour
    */
-  public String retrieveMessage() throws IOException {
-    return this.in.readUTF();
+  private static Color randomNameColor() {
+    return Color.getHSBColor(ThreadLocalRandom.current().nextFloat(), 0.65f, 0.85f);
   }
 }
