@@ -221,8 +221,15 @@ public class Controller {
     private void registerParticipant(Participant participant) {
         this.participants.add(participant);
         System.out.println("Connected to a client computer: " + participant.getInetAddress() +
-                " on local port " + participant.getLocalPort());
-        this.sendParticipantConnectedMessage(participant.getName());
+                " on local port " + participant.getLocalPort() + " (" + participant.getName() + ")");
+        this.sendParticipantConnectedMessage(participant);
+    }
+
+    public void disconnectParticipant(Participant participant) {
+        this.participants.remove(participant);
+        System.out.println("Participant disconnected: " + participant.getInetAddress() +
+                " on local port " + participant.getLocalPort() + " (" + participant.getName() + ")");
+        this.sendParticipantDisconnectedMessage(participant);
     }
 
     public void run() {

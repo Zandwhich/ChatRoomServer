@@ -33,6 +33,11 @@ public class Participant {
         final Participant participant;
 
         /**
+         * If the participant is connected
+         */
+        public Boolean connected = true;
+
+        /**
          * The constructor for the input thread
          * @param threadName The name of the thread
          */
@@ -49,14 +54,11 @@ public class Participant {
         public void run() {
             String input;
 
-            while(true) {
+            while(connected) {
                 try {
                     input = this.readInput();
                 } catch (IOException e) {
-                    System.err.println("There was an error while trying to read in data from the participant");
-                    System.err.println("Message: " + e.getMessage());
-                    System.err.println("Cause: " + e.getCause());
-                    System.err.println("Stack Trace:"); e.printStackTrace();
+                    this.handleDisconnect();
                     break;
                 }
 
@@ -87,8 +89,6 @@ public class Participant {
             try {
                 jsonObject = (JSONObject) this.parser.parse(message);
             } catch (ParseException e) {
-
-                controller.sendParticipantDisconnectedMessage(this.participant);
                 System.err.println("An error occurred while trying to parse a message from participant " + name +
                         " into JSON. Will continue on");
                 System.err.println("Message from the participant: " + message);
@@ -128,6 +128,11 @@ public class Participant {
             String name = (String) jsonMessage.get(Controller.NAME_KEY);
 
             controller.sendMessage(name, nameColor, message, Controller.MESSAGE_COLOR);
+        }
+
+        private void handleDisconnect() {
+            controller.disconnectParticipant(participant);
+            connected = false;
         }
     }
 
