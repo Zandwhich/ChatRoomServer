@@ -115,7 +115,7 @@ public class Participant {
         }//end malformedParticipantMessage()
 
         /**
-         * Broadcasts this message to all of the participants
+         * Broadcasts this message to all the participants
          * @param jsonMessage The message to broadcast as a JSON object
          */
         private void broadcastMessage(JSONObject jsonMessage) {
@@ -154,7 +154,7 @@ public class Participant {
     private final String name;
 
     /**
-     * The color for the participant's name
+     * The colour for the participant's name
      */
     private Color nameColor;
 

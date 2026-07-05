@@ -50,32 +50,32 @@ public class Controller {
     public static final String TIME_KEY = "time";
 
     /**
-     * The key for the color object
+     * The key for the colour object
      */
     public static final String COLOR_KEY = "color";
 
     /**
-     * The key for the red value in the color
+     * The key for the red value in the colour
      */
     public static final String RED_KEY = "red";
 
     /**
-     * The key for the green value in the color
+     * The key for the green value in the colour
      */
     public static final String GREEN_KEY = "green";
 
     /**
-     * The key for the blue value in the color
+     * The key for the blue value in the colour
      */
     public static final String BLUE_KEY = "blue";
 
     /**
-     * The color to use for messages from people
+     * The colour to use for messages from people
      */
     public static final Color MESSAGE_COLOR = Color.BLACK;
 
     /**
-     * The color to use for the initial message when someone connects
+     * The colour to use for the initial message when someone connects
      */
     public static final Color INITIAL_MESSAGE_COLOR = Color.GRAY;
 
@@ -176,11 +176,11 @@ public class Controller {
     }//end run()
 
     /**
-     * Sends a message to all of the participants
+     * Sends a message to all the participants
      * @param name The name of the participant sending the message
-     * @param nameColor The color of the name of the participant
+     * @param nameColor The colour of the name of the participant
      * @param message The message that the participant has sent
-     * @param messageColor The color of the message
+     * @param messageColor The colour of the message
      */
     public void sendMessage(String name, Color nameColor, String message, Color messageColor) {
         JSONObject messageObject = this.constructNamedMessage(name, message, nameColor, messageColor);
@@ -188,9 +188,9 @@ public class Controller {
     }//end sendMessage()
 
     /**
-     * Sends a message to all of the participants
+     * Sends a message to all the participants
      * @param message The message
-     * @param messageColor The color of the message
+     * @param messageColor The colour of the message
      */
     public void sendMessage(String message, Color messageColor) {
         JSONObject messageObject = this.constructMessage(message, messageColor);
@@ -203,8 +203,8 @@ public class Controller {
      * Constructs the JSONObject for a named object (as according to the README)
      * @param name The name of the participant that sent the message
      * @param message The message of the participant
-     * @param nameColor The color of the name
-     * @return The constructed JSONObject with all of the information
+     * @param nameColor The colour of the name
+     * @return The constructed JSONObject with all the information
      */
     @SuppressWarnings("DuplicatedCode")
     private JSONObject constructNamedMessage(String name, String message, Color nameColor, Color messageColor) {
@@ -241,7 +241,7 @@ public class Controller {
      * Constructs the JSONObject for a message without a name
      * (Mostly used for the initial message)
      * @param message The message
-     * @param messageColor The color of the message
+     * @param messageColor The colour of the message
      * @return The JSONObject constructed and ready to be sent
      */
     private JSONObject constructMessage(String message, Color messageColor) {
@@ -263,8 +263,8 @@ public class Controller {
     }//end constructMessage()
 
     /**
-     * Sends a message out to all of the participants
-     * @param message The message to send out to all of the participants
+     * Sends a message out to all the participants
+     * @param message The message to send out to all the participants
      */
     private void broadcast(String message) {
         // TODO: This should be in another thread
