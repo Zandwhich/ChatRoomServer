@@ -20,10 +20,6 @@ import java.net.Inet4Address;
  */
 public class Controller {
 
-    /* Fields */
-
-    // Constants
-
     /**
      * The starting port number for the program
      */
@@ -84,8 +80,6 @@ public class Controller {
      */
     public static final String JUST_CONNECTED_MESSAGE = " has joined the chat";
 
-    // Variables
-
     /**
      * The list of participants in the group
      */
@@ -96,16 +90,13 @@ public class Controller {
      */
     private final JSONParser parser;
 
-
-    /* Constructors */
-
     /**
      * The default constructor
      */
     public Controller() {
         this.participants = new ArrayList<>();
         this.parser = new JSONParser();
-    }//end com.company.Controller()
+    }
 
     /**
      * Prints the IP address of this machine.
@@ -120,8 +111,8 @@ public class Controller {
                     "Shutting down the program");
             this.printErrorMessage(e);
             return false;
-        }//end try/catch
-    }//end printLocalAddress()
+        }
+    }
 
     /**
      * Creates the server socket on the configured port.
@@ -134,8 +125,8 @@ public class Controller {
             System.err.println("There was an error creating the server socket. Breaking out");
             this.printErrorMessage(e);
             return null;
-        }//end try/catch
-    }//end createServerSocket()
+        }
+    }
 
     /**
      * Continuously accepts new client connections until an unrecoverable error occurs.
@@ -147,8 +138,8 @@ public class Controller {
             if (client == null) break;
 
             this.handleNewConnection(client);
-        }//end while true
-    }//end acceptConnections()
+        }
+    }
 
     /**
      * Blocks until a new client connects.
@@ -163,8 +154,8 @@ public class Controller {
             System.err.println("There was an error creating the client connection. Breaking out");
             this.printErrorMessage(e);
             return null;
-        }//end try/catch
-    }//end acceptClient()
+        }
+    }
 
     /**
      * Sets up a newly-connected client as a participant and registers them.
@@ -179,7 +170,7 @@ public class Controller {
         if (participant == null) return;
 
         this.registerParticipant(participant);
-    }//end handleNewConnection()
+    }
 
     /**
      * Reads and parses the initial handshake message from a client to get their name.
@@ -199,9 +190,9 @@ public class Controller {
             this.printErrorMessage(e);
         } catch (ParseException e) {
             System.err.println("There was an error parsing the name out of the initial message.\nInitial message: " + input);
-        }//end try/catch
+        }
         return name;
-    }//end readParticipantName()
+    }
 
     /**
      * Wraps a client socket in a Participant.
@@ -216,8 +207,8 @@ public class Controller {
             System.err.println("There was an error creating a participant. Breaking out");
             this.printErrorMessage(e);
             return null;
-        }//end try/catch
-    }//end createParticipant()
+        }
+    }
 
     /**
      * Adds a participant to the group and announces their arrival.
@@ -228,8 +219,7 @@ public class Controller {
         System.out.println("Connected to a client computer: " + participant.getInetAddress() +
                 " on local port " + participant.getLocalPort());
         this.initialConnectionMessage(participant.getName());
-    }//end registerParticipant()
-
+    }
 
     public void run() {
         if (!printLocalAddress()) return;
@@ -238,7 +228,7 @@ public class Controller {
         if (serverSocket == null) return;
 
         acceptConnections(serverSocket);
-    }//end run()
+    }
 
     /**
      * Sends a message to all the participants
@@ -250,7 +240,7 @@ public class Controller {
     public void sendMessage(String name, Color nameColor, String message, Color messageColor) {
         JSONObject messageObject = this.constructNamedMessage(name, message, nameColor, messageColor);
         this.broadcast(messageObject.toString());
-    }//end sendMessage()
+    }
 
     /**
      * Sends a message to all the participants
@@ -260,9 +250,7 @@ public class Controller {
     public void sendMessage(String message, Color messageColor) {
         JSONObject messageObject = this.constructMessage(message, messageColor);
         this.broadcast(messageObject.toString());
-    }//end sendMessage()
-
-    // Private
+    }
 
     /**
      * Constructs the JSONObject for a named object (as according to the README)
@@ -300,7 +288,7 @@ public class Controller {
         namedMessageObject.put(Controller.MESSAGE_KEY, messageObject);
 
         return namedMessageObject;
-    }//end constructNamedMessage()
+    }
 
     /**
      * Constructs the JSONObject for a message without a name
@@ -325,7 +313,7 @@ public class Controller {
         jsonObject.put(Controller.MESSAGE_KEY, messageObject);
 
         return jsonObject;
-    }//end constructMessage()
+    }
 
     /**
      * Sends a message out to all the participants
@@ -342,9 +330,9 @@ public class Controller {
                 System.err.println("Message: " + e.getMessage());
                 System.err.println("Cause: " + e.getCause());
                 System.err.println("Stack Trace:"); e.printStackTrace();
-            }//end try/catch
-        }//end for
-    }//end broadcast()
+            }
+        }
+    }
 
     /**
      * Prints out a series of error messages when one happens
@@ -355,7 +343,7 @@ public class Controller {
         System.err.println("Message: " + e.getMessage());
         System.err.println("Cause: " + e.getCause());
         System.err.println("Stack Trace:"); e.printStackTrace();
-    }//end printErrorMessage()
+    }
 
     /**
      * Sends out to everyone the message when someone first connects
@@ -363,7 +351,7 @@ public class Controller {
      */
     private void initialConnectionMessage(String name) {
         this.sendMessage(name + Controller.JUST_CONNECTED_MESSAGE, Controller.INITIAL_MESSAGE_COLOR);
-    }//end initialConnectionMessage()
+    }
 
     /**
      * Gets the name out of the initial message that someone sends
@@ -374,5 +362,5 @@ public class Controller {
         JSONObject jsonObject = (JSONObject) this.parser.parse(message);
 
         return (String) jsonObject.get(Controller.NAME_KEY);
-    }//end getNameOutOfInitialMessage()
-}//end com.company.Controller
+    }
+}
