@@ -89,12 +89,12 @@ public class Controller {
     /**
      * The list of participants in the group
      */
-    private ArrayList<Participant> participants;
+    private final ArrayList<Participant> participants;
 
     /**
      * The JSONParser used to parse the initial connection message
      */
-    private JSONParser parser;
+    private final JSONParser parser;
 
 
     /* Constructors */
@@ -107,72 +107,137 @@ public class Controller {
         this.parser = new JSONParser();
     }//end com.company.Controller()
 
-    /* Methods */
-
-    // Public
-
     /**
-     * The method that runs the server-side application
+     * Prints the IP address of this machine.
+     * @return true if successful, false if the server should shut down
      */
-    public void run() {
-
-        // Print out the IP Address of this computer
+    private boolean printLocalAddress() {
         try {
             System.out.println("IP Address: " + Inet4Address.getLocalHost());
+            return true;
         } catch (UnknownHostException e) {
             System.err.println("There was an error printing out the IP Address of the local host.\n" +
                     "Shutting down the program");
             this.printErrorMessage(e);
-            return;
+            return false;
         }//end try/catch
+    }//end printLocalAddress()
 
-        ServerSocket serverSocket;
+    /**
+     * Creates the server socket on the configured port.
+     * @return the ServerSocket, or null if it could not be created
+     */
+    private ServerSocket createServerSocket() {
         try {
-            serverSocket = new ServerSocket(Controller.PORT);
+            return new ServerSocket(Controller.PORT);
         } catch (IOException e) {
             System.err.println("There was an error creating the server socket. Breaking out");
             this.printErrorMessage(e);
-            return;
+            return null;
         }//end try/catch
+    }//end createServerSocket()
 
+    /**
+     * Continuously accepts new client connections until an unrecoverable error occurs.
+     * @param serverSocket the socket to accept connections on
+     */
+    private void acceptConnections(ServerSocket serverSocket) {
         while (true) {
-            Socket client;
-            try {
-                System.out.println("Waiting on port: " + Controller.PORT);
-                client = serverSocket.accept();
-            } catch (IOException e) {
-                System.err.println("There was an error creating the client connection. Breaking out");
-                this.printErrorMessage(e);
-                break;
-            }//end try/catch
+            Socket client = this.acceptClient(serverSocket);
+            if (client == null) break;
 
-            String input = "";
-            String name = "";
-            try {
-                DataInputStream in = new DataInputStream(client.getInputStream());
-                input = in.readUTF();
-                name = getNameOutOfInitialMessage(input);
-            } catch (IOException e) {
-                System.err.println("There was an error creating the temporary client connection. Continuing on");
-                this.printErrorMessage(e);
-            } catch (ParseException e) {
-                System.err.println("There was an error parsing the name out of the initial message.\nInitial message: " + input);
-            }//end try/catch
-
-            Participant participant;
-            try {
-                participant = new Participant(name, client, this);
-            } catch (IOException e) {
-                System.err.println("There was an error creating a participant. Breaking out");
-                this.printErrorMessage(e);
-                break;
-            }// end try/catch
-            this.participants.add(participant);
-            System.out.println("Connected to a client computer: " + participant.getInetAddress() + " on local port " +
-                    participant.getLocalPort());
-            this.initialConnectionMessage(name);
-            //this.port++;
+            this.handleNewConnection(client);
         }//end while true
+    }//end acceptConnections()
+
+    /**
+     * Blocks until a new client connects.
+     * @param serverSocket the socket to accept on
+     * @return the connected client socket, or null on error
+     */
+    private Socket acceptClient(ServerSocket serverSocket) {
+        try {
+            System.out.println("Waiting on port: " + Controller.PORT);
+            return serverSocket.accept();
+        } catch (IOException e) {
+            System.err.println("There was an error creating the client connection. Breaking out");
+            this.printErrorMessage(e);
+            return null;
+        }//end try/catch
+    }//end acceptClient()
+
+    /**
+     * Sets up a newly-connected client as a participant and registers them.
+     * If the participant can't be created (e.g. their streams fail to open),
+     * this client is dropped but the server keeps running and accepting others.
+     * @param client the newly-connected socket
+     */
+    private void handleNewConnection(Socket client) {
+        String name = this.readParticipantName(client);
+
+        Participant participant = this.createParticipant(name, client);
+        if (participant == null) return;
+
+        this.registerParticipant(participant);
+    }//end handleNewConnection()
+
+    /**
+     * Reads and parses the initial handshake message from a client to get their name.
+     * Falls back to an empty name if reading or parsing fails.
+     * @param client the client to read from
+     * @return the participant's name, or "" if it couldn't be determined
+     */
+    private String readParticipantName(Socket client) {
+        String input = "";
+        String name = "";
+        try {
+            DataInputStream in = new DataInputStream(client.getInputStream());
+            input = in.readUTF();
+            name = getNameOutOfInitialMessage(input);
+        } catch (IOException e) {
+            System.err.println("There was an error creating the temporary client connection. Continuing on");
+            this.printErrorMessage(e);
+        } catch (ParseException e) {
+            System.err.println("There was an error parsing the name out of the initial message.\nInitial message: " + input);
+        }//end try/catch
+        return name;
+    }//end readParticipantName()
+
+    /**
+     * Wraps a client socket in a Participant.
+     * @param name the participant's name
+     * @param client the client socket
+     * @return the new Participant, or null if construction failed
+     */
+    private Participant createParticipant(String name, Socket client) {
+        try {
+            return new Participant(name, client, this);
+        } catch (IOException e) {
+            System.err.println("There was an error creating a participant. Breaking out");
+            this.printErrorMessage(e);
+            return null;
+        }//end try/catch
+    }//end createParticipant()
+
+    /**
+     * Adds a participant to the group and announces their arrival.
+     * @param participant the newly-connected participant
+     */
+    private void registerParticipant(Participant participant) {
+        this.participants.add(participant);
+        System.out.println("Connected to a client computer: " + participant.getInetAddress() +
+                " on local port " + participant.getLocalPort());
+        this.initialConnectionMessage(participant.getName());
+    }//end registerParticipant()
+
+
+    public void run() {
+        if (!printLocalAddress()) return;
+
+        ServerSocket serverSocket = createServerSocket();
+        if (serverSocket == null) return;
+
+        acceptConnections(serverSocket);
     }//end run()
 
     /**
