@@ -17,23 +17,15 @@ import java.io.*;
  */
 public class Participant {
 
-    /* Internal Classes */
-
     /**
      * The thread to deal with inputs from the participant
      */
     private class InputThread extends Thread {
 
-        /* Fields */
-
-        // Variables
-
         /**
          * The JSONParser used in parsing Strings into JSONObjects
          */
         JSONParser parser;
-
-        /* Constructors */
 
         /**
          * The constructor for the input thread
@@ -42,11 +34,7 @@ public class Participant {
         public InputThread(String threadName) {
             super(threadName);
             this.parser = new JSONParser();
-        }//end InputThread()
-
-        /* Methods */
-
-        // Public
+        }
 
         /**
          * Deals with receiving inputs from the participant
@@ -64,7 +52,7 @@ public class Participant {
                     System.err.println("Cause: " + e.getCause());
                     System.err.println("Stack Trace:"); e.printStackTrace();
                     break;
-                }//end try/catch
+                }
 
                 JSONObject jsonInput = this.deserializeMessageFromParticipant(input);
 
@@ -72,10 +60,8 @@ public class Participant {
                 if (jsonInput == null) continue;
 
                 this.broadcastMessage(jsonInput);
-            }//end while
-        }//end run()
-
-        // Private
+            }
+        }
 
         /**
          * Reads in the input from the participant
@@ -83,7 +69,7 @@ public class Participant {
          */
         private String readInput() throws IOException {
             return in.readUTF();
-        }//end readInput()
+        }
 
         /**
          * Deserializes a message from the participant from a String into a JSONObject
@@ -101,9 +87,9 @@ public class Participant {
                 System.err.println("Error Message: " + e.getMessage());
                 System.err.println("Cause of error: " + e.getCause());
                 System.err.println("Stack Trace:"); e.printStackTrace();
-            }//end try/catch
+            }
             return jsonObject;
-        }//end deserializeMessageFromParticipant()
+        }
 
         /**
          * Prints out errors if there is a malformed message from the participant
@@ -112,7 +98,7 @@ public class Participant {
         private void malformedParticipantMessage(JSONObject participantMessage) {
             System.err.println("There was a malformed message from participant: " + name);
             System.err.println("Malformed message: " + participantMessage.toString());
-        }//end malformedParticipantMessage()
+        }
 
         /**
          * Broadcasts this message to all the participants
@@ -122,31 +108,25 @@ public class Participant {
             if (!jsonMessage.containsKey(Controller.MESSAGE_KEY) || jsonMessage.get(Controller.MESSAGE_KEY) == null) {
                 this.malformedParticipantMessage(jsonMessage);
                 return;
-            }//end if
+            }
 
             String message = (String) jsonMessage.get(Controller.MESSAGE_KEY);
 
             if (!jsonMessage.containsKey(Controller.NAME_KEY) || jsonMessage.get(Controller.NAME_KEY) == null) {
                 this.malformedParticipantMessage(jsonMessage);
                 return;
-            }//end if
+            }
 
             String name = (String) jsonMessage.get(Controller.NAME_KEY);
 
             controller.sendMessage(name, nameColor, message, Controller.MESSAGE_COLOR);
-        }//end sendMessage()
-    }//end InputThread
-
-    /* Fields */
-
-    // Constants
+        }
+    }
 
     /**
      * The name of the input thread
      */
     public static final String INPUT_THREAD_NAME = "Input Thread";
-
-    // Variables
 
     /**
      * Name of the participant
@@ -178,9 +158,6 @@ public class Participant {
      */
     private final DataOutputStream out;
 
-
-    /* Constructors */
-
     /**
      * The constructor of the com.company.Participant class
      * @param name The name of the participant
@@ -197,35 +174,58 @@ public class Participant {
 
         InputThread inputThread = new InputThread(Participant.INPUT_THREAD_NAME);
         inputThread.start();
-    }//end com.company.Participant()
+    }
 
+    /**
+     * @return The name of the participant
+     */
+    public String getName() {
+        return this.name;
+    }
 
-    /* Methods */
+    /**
+     * @return The socket of the participant
+     */
+    public Socket getClient() {
+        return this.client;
+    }
 
-    // Getters
-    public String getName() { return this.name; }//end getName()
-    public Socket getClient() { return this.client; }//end getClient()
-    public int getLocalPort() { return this.client.getLocalPort(); }//end getLocalPort()
-    public int getRemotePort() { return this.client.getPort(); }//end getRemotePort()
-    public InetAddress getInetAddress() { return this.client.getInetAddress(); }//end getInetAddress
+    /**
+     * @return The local port of the participant's connection
+     */
+    public int getLocalPort() {
+        return this.client.getLocalPort();
+    }
+
+    /**
+     * @return The remote port of the participant's connection
+     */
+    public int getRemotePort() {
+        return this.client.getPort();
+    }
+
+    /**
+     * @return The internet address of the participant
+     */
+    public InetAddress getInetAddress() {
+        return this.client.getInetAddress();
+    }
 
     /**
      * Sends a message to the participant
      * @param message The message that is sent to the participant
-     * @throws IOException Where there's an error? Idk man...
+     * @throws IOException If there's an error sending the message
      */
     public void sendMessage(String message) throws IOException {
         this.out.writeUTF(message);
-    }//end sendMessage()
+    }
 
     /**
      * Retrieves messages from the participant
      * @return The message from the participant
-     * @throws IOException I think this is for when there's an error (lol)
+     * @throws IOException If there's an error reading the message
      */
     public String retrieveMessage() throws IOException {
         return this.in.readUTF();
-    }//end retrieveMessage()
-
-
-}//end com.company.Participant
+    }
+}

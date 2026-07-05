@@ -1,6 +1,8 @@
-package com.company;/*
+/*
  * Author: Alex Zdanowicz
  */
+
+package com.company;
 
 import json_simple.JSONObject;
 import json_simple.parser.JSONParser;
